@@ -1,7 +1,9 @@
 ﻿<Properties StartupConfiguration="{8B8F5AA4-0114-3F58-29D3-93CE30D09AD7}|">
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/SmoothFollowCSharp.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/CarMovement.cs">
     <Files>
-      <File FileName="Assets/Scripts/SmoothFollowCSharp.cs" Line="1" Column="1" />
+      <File FileName="Assets/Scripts/PlayerCar.cs" Line="223" Column="32" IsPinned="True" />
+      <File FileName="Assets/Scripts/SmoothFollowCSharp.cs" Line="62" Column="32" />
+      <File FileName="Assets/Scripts/CarMovement.cs" Line="91" Column="88" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
@@ -9,7 +11,8 @@
           <Node name="Zero Drift" expanded="True">
             <Node name="Assets" expanded="True">
               <Node name="Scripts" expanded="True">
-                <Node name="SmoothFollowCSharp.cs" selected="True" />
+                <Node name="Old Scripts" expanded="True" />
+                <Node name="CarMovement.cs" selected="True" />
               </Node>
             </Node>
           </Node>
@@ -19,7 +22,7 @@
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches />
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.ItemProperties.Assembly-CSharp PreferredExecutionTarget="4ccc2ec6-ed65-4f94-9be0-d1a967e7358d" />
+  <MonoDevelop.Ide.ItemProperties.Assembly-CSharp PreferredExecutionTarget="ea518cbd-bdd1-4b99-9f00-d3123a24a240" />
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore />
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
