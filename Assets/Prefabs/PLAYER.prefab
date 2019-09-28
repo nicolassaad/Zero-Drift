@@ -61,7 +61,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 701262327443197538}
-  m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 1.1348245, y: 0.29223433, z: -0.7272926}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
@@ -157,7 +157,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2606210630100853239}
-  m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 1.1347157, y: 0.29234314, z: 0.7266104}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
@@ -580,7 +580,8 @@ GameObject:
   - component: {fileID: 8932871544329506988}
   - component: {fileID: 3980602642908820001}
   - component: {fileID: 5931590089917671061}
-  - component: {fileID: 8932871543613626886}
+  - component: {fileID: 1808664843}
+  - component: {fileID: 1808664844}
   m_Layer: 0
   m_Name: PLAYER
   m_TagString: Untagged
@@ -612,8 +613,8 @@ Rigidbody:
   m_GameObject: {fileID: 8932871544329506989}
   serializedVersion: 2
   m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 2
+  m_Drag: 0.4
+  m_AngularDrag: 5.3
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 1
@@ -633,7 +634,7 @@ AudioSource:
   m_PlayOnAwake: 1
   m_Volume: 1
   m_Pitch: 1
-  Loop: 1
+  Loop: 0
   Mute: 0
   Spatialize: 0
   SpatializePostEffects: 0
@@ -715,7 +716,20 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!114 &8932871543613626886
+--- !u!65 &1808664843
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8932871544329506989}
+  m_Material: {fileID: 13400000, guid: b90e403b9f8aa42ec94e31b9f09a1978, type: 2}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1.69, y: 1.09, z: 4.0640793}
+  m_Center: {x: 0, y: 1.2, z: 0.18296015}
+--- !u!114 &1808664844
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -727,5 +741,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d84d778d89114e888d2c698b8a1791f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  throttle: 0
-  horizontal: 0
+  carTransform: {fileID: 8932871544329506988}
+  LFWheelTransform: {fileID: 8932871543425809925}
+  RFWheelTransform: {fileID: 8932871543520883438}
+  frontLeftWheel: {fileID: 586858063912263458}
+  frontRightWheel: {fileID: 3421889529681743105}
+  rearLeftWheel: {fileID: 6304851094118906682}
+  rearRightWheel: {fileID: 3217337864585583219}
+  power: 1800
+  maxSpeed: 50
+  carGrip: 70
+  turnSpeed: 2.3
+  slideSpeed: 0
+  actualGrip: 0
+  carSpeed: 0
+  carEngine: {fileID: 8300000, guid: 309ae10e6293d4f7aafa20635f2e18a5, type: 3}
