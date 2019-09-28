@@ -50,7 +50,7 @@ public class CarMovement : MonoBehaviour
     private float rev;
     private float carMass;
     private Vector3 turnVec;
-    private readonly float minSpeedToTurn = 0.6f;
+    private readonly float minSpeedToTurn = 0.8f;
 
     private AudioSource audioSource;
     private float audioSourcePitch;
@@ -142,7 +142,8 @@ public class CarMovement : MonoBehaviour
         flatDir = Vector3.Normalize(tempVEC);
 
         // In the old script this was the first appearing of flatVelo, meaning the value will always be zero. WTF?
-        relativeVelocity = carTransform.InverseTransformDirection(flatVelo);
+        //this is the key to getting the wheels to move...
+        relativeVelocity = carTransform.InverseTransformDirection(velo.x, 0f, velo.z);
 
         //BROKEN: Gets no value
         // calculate how much we are sliding (find out movement along x axis)
@@ -166,7 +167,7 @@ public class CarMovement : MonoBehaviour
             actualTurn = -actualTurn;
         }
 
-        turnVec = (((carUp * turnSpeed) * actualTurn) * carMass) * 650;
+        turnVec = (((carUp * turnSpeed) * actualTurn) * carMass) * 800;
 
         // actualGrip gives accurate reading but changing carGrip value has no effect. 
         actualGrip = Mathf.Lerp(100, carGrip, carSpeed * 0.02f);
@@ -199,7 +200,9 @@ public class CarMovement : MonoBehaviour
         LFWheelTransform.localEulerAngles = new Vector3(0f, horizontal * 30f, 0f);
         RFWheelTransform.localEulerAngles = new Vector3(0f, horizontal * 30f, 0f);
 
-        rotationAmount = carForward * (relativeVelocity.z * 1.6f * Time.deltaTime * Mathf.Rad2Deg);
+        rotationAmount = carForward * (velo.magnitude * 1.6f * Time.deltaTime * Mathf.Rad2Deg);
+
+        Debug.Log("rotationAmount :" + rotationAmount);
 
         wheelTransforms[0].Rotate(rotationAmount);
         wheelTransforms[1].Rotate(rotationAmount);
