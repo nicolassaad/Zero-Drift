@@ -1,13 +1,11 @@
 ﻿using UnityEngine;
 
-// Borrowed a lot of ideas from the previous car script I was using.
-// Flipping the steering when driving in reverse and faking inertia with SlowVelocity()
-// Borrowed RotateVisualWheels() so front wheels can turn visually
-// TODO wheels can spin visually but spin on their own and aren't tied to the speed of the car
-// TODO Make drifting harder (make car slide less) and add a handbrake to car
-// TODO Disable car throttle and steering when car isn't touching ground (wheels still rotate and turn) 
-// BROKEN: flatVelo var never worked neither in this script or the old one, I think it's causing slideSpeed to not work
-// BROKEN: Car barely is able to turn when driving at higher speeds
+// TODO Add a handbrake: Applying handbrake lessen carGrip making it easier to drift
+// TODO Disable car throttle and steering when car isn't touching ground (wheels still rotate and turn)
+// TODO Program CheckInput to handle a Xbox controller
+// TODO Wheels keep spinning forwards when car is in reverse
+// TODO flatVelo var never worked neither in this script or the old one, causing slideSpeed and relativeVelocity to not work
+// TODO how to add fake suspension
 
 public class CarMovement : MonoBehaviour
 {
@@ -22,9 +20,9 @@ public class CarMovement : MonoBehaviour
     public Transform rearLeftWheel;
     public Transform rearRightWheel;
 
-    public float power = 1500f;
-    public float maxSpeed = 50f;
-    public float carGrip = 70f; 
+    public float power = 1650f;
+    public float maxSpeed = 40f;
+    public float carGrip = 140f; 
     public float turnSpeed = 2f;
 
     public float slideSpeed;
@@ -167,6 +165,7 @@ public class CarMovement : MonoBehaviour
             actualTurn = -actualTurn;
         }
 
+        // calculating the turning vector
         turnVec = (((carUp * turnSpeed) * actualTurn) * carMass) * 800;
 
         // actualGrip gives accurate reading but changing carGrip value has no effect. 
@@ -200,9 +199,7 @@ public class CarMovement : MonoBehaviour
         LFWheelTransform.localEulerAngles = new Vector3(0f, horizontal * 30f, 0f);
         RFWheelTransform.localEulerAngles = new Vector3(0f, horizontal * 30f, 0f);
 
-        rotationAmount = carForward * (velo.magnitude * 1.6f * Time.deltaTime * Mathf.Rad2Deg);
-
-        Debug.Log("rotationAmount :" + rotationAmount);
+        rotationAmount = carForward * (velo.magnitude * 1.6f * Time.deltaTime * Mathf.Rad2Deg); //used velo.magnitude instead of relativeVelo
 
         wheelTransforms[0].Rotate(rotationAmount);
         wheelTransforms[1].Rotate(rotationAmount);

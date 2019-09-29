@@ -748,8 +748,8 @@ MonoBehaviour:
   frontRightWheel: {fileID: 3421889529681743105}
   rearLeftWheel: {fileID: 6304851094118906682}
   rearRightWheel: {fileID: 3217337864585583219}
-  power: 1500
-  maxSpeed: 50
+  power: 1650
+  maxSpeed: 40
   carGrip: 200
   turnSpeed: 2
   slideSpeed: 0
