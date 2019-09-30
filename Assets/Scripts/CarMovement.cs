@@ -5,237 +5,121 @@
 // TODO Disable throttle and turning when car is in the air (wheels still can turn, and throttle can still rev)
 //      Ground box collision can be a trigger and make a boolean that can be checked in FixedUpdate(). If carOnGround = true
 //      then run all the code in FixedUpdate(). Otherwise return so nothing happens.
-// TODO Program CheckInput to handle a Xbox controller
-// TODO Wheels keep spinning forwards when car is in reverse
-// TODO Add exhuast smoke and tire skid marks (using slideSpeed)
-// TODO flatVelo var never worked neither in this script or the old one, causing slideSpeed, relativeVelocity, and imp to not work
-// TODO how to add fake suspension
 
 // The current values I have for the PLAYER rigidbody as well as the CarMovement vars should be used for when the handbrake is applied.
 // Otherwise the car should be a little harder to turn and drift without it. 
 
-public class CarMovement : MonoBehaviour
-{
-    private float throttle;
-    private float horizontal;
-    public Transform carTransform;
+public class CarMovement : MonoBehaviour {
+    public float SteerThrow = 45f;
+    public float EnginePower = 1650f;
+    public float TireGrip = 140f;
+    public float RedlineRPM = 8000f;
+    public float SteerSpeed = 45f; // deg/sec
+    public float Drag = 10f;
+    public float MaxSpeed = 25f;
 
-    public Transform LFWheelTransform;
-    public Transform RFWheelTransform;
-    public Transform frontLeftWheel;
-    public Transform frontRightWheel;
-    public Transform rearLeftWheel;
-    public Transform rearRightWheel;
+    public Transform CoM;
+    public Transform[] Wheels;
+    public Transform[] Steering;
+    public Transform[] TireContact;
 
-    public float power = 1650f;
-    public float maxSpeed = 40f;
-    public float carGrip = 140f; 
-    public float turnSpeed = 2f;
+    public int[] PowerContact;
 
-    public float slideSpeed;
-    public float actualGrip;
+    private Vector3[] GroundNormal;
 
-    private Transform[] wheelTransforms = new Transform[4]; // transforms for the 2 front wheels
-    private Vector3 velo;
-    private Vector3 tempVEC;
-    private Vector3 dir;
-    private Vector3 flatDir;
+    public float EnginePitchMin = 1f;
+    public float EnginePitchMax = 2f;
 
-    private float actualTurn;
-    private Vector3 imp;
-    private Rigidbody carRigidbody;
-    private Vector3 carForward;
-    private Vector3 carRight;
-    private Vector3 carUp;
-    private Vector3 relativeVelocity;
-    private Vector3 com = new Vector3(0f, 0.1f, .15f);
-    public float carSpeed;
-    private Vector3 flatVelo;
-    private Vector3 engineForce;
-    private float rev;
-    private float carMass;
-    private Vector3 turnVec;
-    private readonly float minSpeedToTurn = 0.8f;
+    private Rigidbody rbody;
 
-    private AudioSource audioSource;
-    private float audioSourcePitch;
-    public AudioClip carEngine;
+    private AudioSource audioSrc;
 
-    void Start()
-    {
-        Initialize();
+    private float ThrottleInput;
+    private float SteerInput;
+    private float SteerRotation;
+    private float EngineRPM;
+    private float[] WheelSpin;
+
+    void Start() {
+        rbody = GetComponent<Rigidbody>();
+        rbody.centerOfMass = CoM.localPosition;
+        audioSrc = GetComponent<AudioSource>();
+
+        GroundNormal = new Vector3[TireContact.Length];
+        WheelSpin = new float[Wheels.Length];
     }
 
-    void Initialize()
-    {
-        carRigidbody = GetComponent<Rigidbody>();
-        carMass = GetComponent<Rigidbody>().mass;
-        carForward = Vector3.forward;
-        carRight = Vector3.right;
-        carUp = carTransform.up;
-        carRigidbody.centerOfMass = com; //center of mass defined neg value used to keep car from flipping
-        audioSource = GetComponent<AudioSource>();
-        audioSourcePitch = GetComponent<AudioSource>().pitch;
-        audioSource.clip = carEngine;
-        audioSource.loop = true;
-        SetUpWheels();
-    }
-
-    void Update()
-    {
-        // Check input for keyboard
-        CheckInput();
-        // Handle car physics
-        CarPhysicsUpdate();
-        // Slow car down with inertia * disabled for now *
-        //SlowVelocity();
-    }
-
-    private void LateUpdate()
-    {
-        // Rotate and turn wheels
-        RotateVisualWheels();
-        // Engine revs with speed
-        EngineSound();
-    }
-
-    private void FixedUpdate()
-    {
-        if (carSpeed < maxSpeed)
-        {
-            carRigidbody.AddForce(engineForce * Time.fixedDeltaTime, ForceMode.Force);
-        }
-
-        if (carSpeed > minSpeedToTurn)
-        {
-            carRigidbody.AddTorque(turnVec * Time.fixedDeltaTime, ForceMode.Force);
-
-        } else if (minSpeedToTurn < carSpeed)
-        {
-            return;
-        }
-
-        // Apply forces to our rigidbody for grip
-        carRigidbody.AddForce(imp * Time.fixedDeltaTime);
-    }
-
-    void CheckInput()
-    {
-        if (Application.platform == RuntimePlatform.WindowsEditor || Application.platform == RuntimePlatform.WindowsPlayer
-             || Application.platform == RuntimePlatform.OSXEditor || Application.platform == RuntimePlatform.OSXPlayer)
-        {
-            // Use the keyboard for car input
-            horizontal = Input.GetAxis("Horizontal");
-            throttle = Input.GetAxis("Vertical");
-        }
-    }
-
-    void CarPhysicsUpdate()
-    {
-        carTransform = transform;
-
-        // Taking out the Y values from our direction vector
-        velo = carRigidbody.velocity;
-
-        tempVEC = new Vector3(velo.x, 0f, velo.z);
-
-        // figure out velocity without y movement - our flat velocity
-        dir = transform.TransformDirection(carForward);
-
-        tempVEC = new Vector3(dir.x, 0f, dir.z);
-
-        // calculate our direction, removing y movement - our flat direction
-        flatDir = Vector3.Normalize(tempVEC);
-
-        flatVelo = new Vector3(velo.x, 0f, velo.z);
-
-        flatVelo = Vector3.Normalize(flatVelo);
-
-        // In the old script this was the first appearing of flatVelo, meaning the value will always be zero. WTF?
-        //this is the key to getting the wheels to move...
-        relativeVelocity = carTransform.InverseTransformDirection(flatVelo); // flatVelo has no value
-
-        //BROKEN: Gets no value
-        // calculate how much we are sliding (find out movement along x axis)
-        slideSpeed = Vector3.Dot(carRight, flatVelo);
-
-        // calculates current speed
-        //BROKEN: I need flatVelo but it has no value
-        carSpeed = velo.magnitude;
-
-        // check if we're moving in reverse 
-        rev = Mathf.Sign(Vector3.Dot(flatVelo, flatDir));
-
-        // calculate engine force with our flat direction vector and acceleration 
-        engineForce = (flatDir * (power * throttle) * carMass);
-
-        // do turning
-        actualTurn = horizontal;
-
-        if (rev < 0.0f)
-        {
-            actualTurn = -actualTurn;
-        }
-
-        // calculating the turning vector
-        turnVec = (((carUp * turnSpeed) * actualTurn) * carMass) * 800;
-
-        // actualGrip gives accurate reading but changing carGrip value has no effect because imp doesn't work
-        actualGrip = Mathf.Lerp(100, carGrip, carSpeed * 0.02f);
-
-        // (slidespeed doesn't work so imp won't either)
-        imp = carRight * (-slideSpeed * carMass * actualGrip);
-    }
-
-    // BROKEN: Wheels steer but don't rotate
-    void SetUpWheels()
-    {
-        if (frontLeftWheel == null || frontRightWheel == null)
-        {
-            Debug.LogError("One of more of the wheel transforms have not been plugged into the car");
-            Debug.Break();
-        }
+    private void FixedUpdate() {
+        // Increment Engine RPM
+        if (ThrottleInput != 0f)
+            EngineRPM += Mathf.Abs(ThrottleInput) * RedlineRPM * Time.fixedDeltaTime;
         else
-        {
-            wheelTransforms[0] = frontLeftWheel;
-            wheelTransforms[1] = frontRightWheel;
-            wheelTransforms[2] = rearLeftWheel;
-            wheelTransforms[3] = rearRightWheel;
-        }
-    }
+            EngineRPM -= RedlineRPM * Time.fixedDeltaTime;
+        EngineRPM = Mathf.Clamp(EngineRPM, 0, RedlineRPM);
 
-    private Vector3 rotationAmount;
+        // Rotate front tires for steering
+        if (SteerInput != 0f)
+            SteerRotation += SteerInput * SteerSpeed * Time.fixedDeltaTime;
+        else
+            SteerRotation += SteerSpeed * -Mathf.Sign(SteerRotation) * Time.fixedDeltaTime;
+        SteerRotation = Mathf.Clamp(SteerRotation, -SteerThrow, SteerThrow);
+        Quaternion steer = Quaternion.Euler(0, SteerRotation, 0);
+        for (int i = 0; i < Steering.Length; i++)
+            Steering[i].localRotation = steer;
 
-    void RotateVisualWheels()
-    {
-        LFWheelTransform.localEulerAngles = new Vector3(0f, horizontal * 30f, 0f);
-        RFWheelTransform.localEulerAngles = new Vector3(0f, horizontal * 30f, 0f);
-
-        // relativeVelocity should be here instead of velo.magnitute
-        rotationAmount = carForward * (velo.magnitude * 1.6f * Time.deltaTime * Mathf.Rad2Deg);
-
-        wheelTransforms[0].Rotate(rotationAmount);
-        wheelTransforms[1].Rotate(rotationAmount);
-        wheelTransforms[2].Rotate(rotationAmount);
-        wheelTransforms[3].Rotate(rotationAmount);
-    }
-
-    void SlowVelocity()
-    {
-        // letting inertia naturally slow the car down CURRENTLY DRAG & ANGULAR DRAG ARE DOING THE WORK 
-        //carRigidbody.AddForce(-carTransform.forward * 0.8f);
-    }
-
-    void EngineSound()
-    {
-        audioSourcePitch = 0.30f + carSpeed * 0.025f;
-
-        // setting a max value for the pitch
-        if (audioSourcePitch > 2.0)
-        {
-            audioSourcePitch = 2.0f;
+        // Split engine power over all wheels that provide power
+        float engineForce = ThrottleInput * EnginePower / PowerContact.Length;
+        for (int i = 0; i < PowerContact.Length; i++) {
+            if (GroundNormal[PowerContact[i]].sqrMagnitude < .001f) continue;
+            Vector3 dir = Vector3.ProjectOnPlane(TireContact[PowerContact[i]].forward, GroundNormal[PowerContact[i]]);
+            rbody.AddForceAtPosition(dir * engineForce, TireContact[PowerContact[i]].position); // apply power from the contact patch from each wheel that receives engine power
         }
 
-        audioSource.pitch = audioSourcePitch;
+        // Grip force
+        for (int i = 0; i < TireContact.Length; i++) {
+            if (GroundNormal[i].sqrMagnitude < .001f) continue;
+            // compute velocity of car relative to the tire
+            Vector3 groundVel = Vector3.ProjectOnPlane(rbody.velocity, GroundNormal[i]);
+            Vector3 relVel = TireContact[i].InverseTransformVector(groundVel);
+            WheelSpin[i] += relVel.z / .038f; // TODO: make this number the radius of the wheel
+
+            relVel.y = relVel.z = 0;
+            relVel.x = -relVel.x;
+
+            rbody.AddForceAtPosition(relVel * TireGrip, TireContact[i].position);
+            Wheels[i].localRotation = Quaternion.Euler(0, 0, WheelSpin[i] * Mathf.Deg2Rad);
+        }
+
+        // Drag
+        rbody.AddForce(-rbody.velocity * Vector3.Dot(rbody.velocity, rbody.velocity) * Drag);
+    }
+
+    void Update() {
+        // Handle input
+        SteerInput = Input.GetAxis("Horizontal");
+        ThrottleInput = Input.GetAxis("Vertical");
+    }
+
+    private void LateUpdate() {
+        audioSrc.pitch = Mathf.Lerp(EnginePitchMin, EnginePitchMax, EngineRPM / RedlineRPM);
+    }
+
+    private void OnCollisionEnter(Collision collision) {
+        for (int i = 0; i < collision.contacts.Length; i++)
+            for (int j = 0; j < Wheels.Length; j++)
+                if (collision.contacts[i].thisCollider.transform == Wheels[j])
+                    GroundNormal[j] = collision.contacts[i].normal;
+    }
+    private void OnCollisionStay(Collision collision) {
+        for (int i = 0; i < collision.contacts.Length; i++)
+            for (int j = 0; j < Wheels.Length; j++)
+                if (collision.contacts[i].thisCollider.transform == Wheels[j])
+                    GroundNormal[j] = collision.contacts[i].normal;
+    }
+    private void OnCollisionExit(Collision collision) {
+        for (int i = 0; i < collision.contacts.Length; i++)
+            for (int j = 0; j < Wheels.Length; j++)
+                if (collision.contacts[i].thisCollider.transform == Wheels[j])
+                    GroundNormal[j] = Vector3.zero;
     }
 }
