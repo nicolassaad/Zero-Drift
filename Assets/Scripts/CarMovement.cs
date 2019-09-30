@@ -1,11 +1,18 @@
 ﻿using UnityEngine;
 
-// TODO Add a handbrake: Applying handbrake lessen carGrip making it easier to drift
-// TODO Disable car throttle and steering when car isn't touching ground (wheels still rotate and turn)
+// TODO Add a handbrake: Applying handbrake should lessen carGrip and increase turnspeed as long as the handbrake is being held.
+//      Or maybe you can even momentarily change the ForceMode to VelocityChange while the brake is being held. 
+// TODO Disable throttle and turning when car is in the air (wheels still can turn, and throttle can still rev)
+//      Ground box collision can be a trigger and make a boolean that can be checked in FixedUpdate(). If carOnGround = true
+//      then run all the code in FixedUpdate(). Otherwise return so nothing happens.
 // TODO Program CheckInput to handle a Xbox controller
 // TODO Wheels keep spinning forwards when car is in reverse
-// TODO flatVelo var never worked neither in this script or the old one, causing slideSpeed and relativeVelocity to not work
+// TODO Add exhuast smoke and tire skid marks (using slideSpeed)
+// TODO flatVelo var never worked neither in this script or the old one, causing slideSpeed, relativeVelocity, and imp to not work
 // TODO how to add fake suspension
+
+// The current values I have for the PLAYER rigidbody as well as the CarMovement vars should be used for when the handbrake is applied.
+// Otherwise the car should be a little harder to turn and drift without it. 
 
 public class CarMovement : MonoBehaviour
 {
@@ -53,6 +60,7 @@ public class CarMovement : MonoBehaviour
     private AudioSource audioSource;
     private float audioSourcePitch;
     public AudioClip carEngine;
+
     void Start()
     {
         Initialize();
@@ -79,8 +87,8 @@ public class CarMovement : MonoBehaviour
         CheckInput();
         // Handle car physics
         CarPhysicsUpdate();
-        // Slow car down with inertia   
-        SlowVelocity();
+        // Slow car down with inertia * disabled for now *
+        //SlowVelocity();
     }
 
     private void LateUpdate()
@@ -139,9 +147,13 @@ public class CarMovement : MonoBehaviour
         // calculate our direction, removing y movement - our flat direction
         flatDir = Vector3.Normalize(tempVEC);
 
+        flatVelo = new Vector3(velo.x, 0f, velo.z);
+
+        flatVelo = Vector3.Normalize(flatVelo);
+
         // In the old script this was the first appearing of flatVelo, meaning the value will always be zero. WTF?
         //this is the key to getting the wheels to move...
-        relativeVelocity = carTransform.InverseTransformDirection(velo.x, 0f, velo.z);
+        relativeVelocity = carTransform.InverseTransformDirection(flatVelo); // flatVelo has no value
 
         //BROKEN: Gets no value
         // calculate how much we are sliding (find out movement along x axis)
@@ -168,10 +180,10 @@ public class CarMovement : MonoBehaviour
         // calculating the turning vector
         turnVec = (((carUp * turnSpeed) * actualTurn) * carMass) * 800;
 
-        // actualGrip gives accurate reading but changing carGrip value has no effect. 
+        // actualGrip gives accurate reading but changing carGrip value has no effect because imp doesn't work
         actualGrip = Mathf.Lerp(100, carGrip, carSpeed * 0.02f);
 
-        // (slidespeed doesn't work so this won't either)
+        // (slidespeed doesn't work so imp won't either)
         imp = carRight * (-slideSpeed * carMass * actualGrip);
     }
 
@@ -199,7 +211,8 @@ public class CarMovement : MonoBehaviour
         LFWheelTransform.localEulerAngles = new Vector3(0f, horizontal * 30f, 0f);
         RFWheelTransform.localEulerAngles = new Vector3(0f, horizontal * 30f, 0f);
 
-        rotationAmount = carForward * (velo.magnitude * 1.6f * Time.deltaTime * Mathf.Rad2Deg); //used velo.magnitude instead of relativeVelo
+        // relativeVelocity should be here instead of velo.magnitute
+        rotationAmount = carForward * (velo.magnitude * 1.6f * Time.deltaTime * Mathf.Rad2Deg);
 
         wheelTransforms[0].Rotate(rotationAmount);
         wheelTransforms[1].Rotate(rotationAmount);

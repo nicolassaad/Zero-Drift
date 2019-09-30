@@ -59,6 +59,6 @@ public class SmoothFollowCSharp : MonoBehaviour
 		// Always look at the target
 		transform.LookAt(target);
 
-        transform.eulerAngles += new Vector3(-21.8f, 0f, 0f); // Camera rotation adjustment for current dist and height vals
+        transform.eulerAngles += new Vector3(-18.8f, 0f, 0f); // Camera rotation adjustment for current dist and height vals
 	}
 }
