@@ -58,7 +58,7 @@ public class CarMovement : MonoBehaviour {
         if (SteerInput != 0f)
             SteerRotation += SteerInput * SteerSpeed * Time.fixedDeltaTime;
         else
-            SteerRotation += SteerSpeed * -Mathf.Sign(SteerRotation) * Time.fixedDeltaTime;
+            SteerRotation += Mathf.Min(Mathf.Abs(SteerRotation), SteerSpeed * Time.fixedDeltaTime) * -Mathf.Sign(SteerRotation);
          SteerRotation = Mathf.Clamp(SteerRotation, -SteerThrow, SteerThrow);
          Quaternion steer = Quaternion.Euler(0, SteerRotation, 0);
 
@@ -77,16 +77,19 @@ public class CarMovement : MonoBehaviour {
         for (int i = 0; i < TireContact.Length; i++) {
             if (GroundNormal[i].sqrMagnitude < .001f) continue;
             // compute velocity of car relative to the tire
-            Vector3 groundVel = Vector3.ProjectOnPlane(rbody.velocity, GroundNormal[i]);
+            Vector3 groundVel = Vector3.ProjectOnPlane(rbody.GetPointVelocity(TireContact[i].position), GroundNormal[i]);
             Vector3 relVel = TireContact[i].InverseTransformVector(groundVel);
-            WheelSpin[i] += relVel.z / .038f; // TODO: make this number the radius of the wheel
+            WheelSpin[i] += relVel.z / Time.fixedDeltaTime / .304f; // TODO: make .304 (the wheel radius) not hard-coded
 
             relVel.y = relVel.z = 0;
             relVel.x = -relVel.x;
-            relVel = TireContact[i].TransformVector(relVel);
 
-            rbody.AddForceAtPosition(relVel * TireGrip, TireContact[i].position);
+            Vector3 tireForce = TireContact[i].TransformVector(relVel) * TireGrip;
+
+            rbody.AddForceAtPosition(tireForce, TireContact[i].position);
             Wheels[i].localRotation = Quaternion.Euler(0, 0, WheelSpin[i] * Mathf.Deg2Rad);
+
+            Debug.DrawLine(TireContact[i].position, TireContact[i].position + tireForce / rbody.mass);
         }
 
         // Drag

@@ -90,7 +90,7 @@ SphereCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 316846715043836500}
-  m_Material: {fileID: 13400000, guid: b90e403b9f8aa42ec94e31b9f09a1978, type: 2}
+  m_Material: {fileID: 13400000, guid: 874b5ecf630a22a43b1e1d835242b762, type: 2}
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
@@ -315,7 +315,7 @@ SphereCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3023559072788012481}
-  m_Material: {fileID: 13400000, guid: b90e403b9f8aa42ec94e31b9f09a1978, type: 2}
+  m_Material: {fileID: 13400000, guid: 874b5ecf630a22a43b1e1d835242b762, type: 2}
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
@@ -441,7 +441,7 @@ SphereCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5112841277387346227}
-  m_Material: {fileID: 13400000, guid: b90e403b9f8aa42ec94e31b9f09a1978, type: 2}
+  m_Material: {fileID: 13400000, guid: 874b5ecf630a22a43b1e1d835242b762, type: 2}
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
@@ -537,7 +537,7 @@ SphereCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5188533680828134904}
-  m_Material: {fileID: 13400000, guid: b90e403b9f8aa42ec94e31b9f09a1978, type: 2}
+  m_Material: {fileID: 13400000, guid: 874b5ecf630a22a43b1e1d835242b762, type: 2}
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
@@ -5553,9 +5553,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   SteerThrow: 45
   EnginePower: 30000
-  TireGrip: 2500
+  TireGrip: 7500
   RedlineRPM: 8000
-  SteerSpeed: 60
+  SteerSpeed: 360
   Drag: 10
   MaxSpeed: 25
   CoM: {fileID: 4942516418639879086}
@@ -10458,7 +10458,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8368372327136521384}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.323, z: 0}
+  m_LocalPosition: {x: 0, y: 0.214, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 6609415071612879631}
