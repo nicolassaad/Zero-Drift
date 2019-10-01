@@ -6,9 +6,6 @@
 //      Ground box collision can be a trigger and make a boolean that can be checked in FixedUpdate(). If carOnGround = true
 //      then run all the code in FixedUpdate(). Otherwise return so nothing happens.
 
-// The current values I have for the PLAYER rigidbody as well as the CarMovement vars should be used for when the handbrake is applied.
-// Otherwise the car should be a little harder to turn and drift without it. 
-
 public class CarMovement : MonoBehaviour {
     public float SteerThrow = 45f;
     public float EnginePower = 1650f;
@@ -62,8 +59,9 @@ public class CarMovement : MonoBehaviour {
             SteerRotation += SteerInput * SteerSpeed * Time.fixedDeltaTime;
         else
             SteerRotation += SteerSpeed * -Mathf.Sign(SteerRotation) * Time.fixedDeltaTime;
-        SteerRotation = Mathf.Clamp(SteerRotation, -SteerThrow, SteerThrow);
-        Quaternion steer = Quaternion.Euler(0, SteerRotation, 0);
+         SteerRotation = Mathf.Clamp(SteerRotation, -SteerThrow, SteerThrow);
+         Quaternion steer = Quaternion.Euler(0, SteerRotation, 0);
+
         for (int i = 0; i < Steering.Length; i++)
             Steering[i].localRotation = steer;
 
@@ -85,6 +83,7 @@ public class CarMovement : MonoBehaviour {
 
             relVel.y = relVel.z = 0;
             relVel.x = -relVel.x;
+            relVel = TireContact[i].TransformVector(relVel);
 
             rbody.AddForceAtPosition(relVel * TireGrip, TireContact[i].position);
             Wheels[i].localRotation = Quaternion.Euler(0, 0, WheelSpin[i] * Mathf.Deg2Rad);
