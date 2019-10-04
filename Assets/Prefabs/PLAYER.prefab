@@ -5552,12 +5552,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   SteerThrow: 45
-  EnginePower: 30000
-  TireGrip: 7500
+  EnginePower: 22500
+  TireGrip: 12000
   RedlineRPM: 8000
   SteerSpeed: 360
-  Drag: 10
-  MaxSpeed: 25
+  Drag: 0
+  MaxSpeed: 0
   CoM: {fileID: 4942516418639879086}
   Wheels:
   - {fileID: 2912215867347274881}
@@ -10458,7 +10458,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8368372327136521384}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.214, z: 0}
+  m_LocalPosition: {x: 0, y: 0.01, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 6609415071612879631}

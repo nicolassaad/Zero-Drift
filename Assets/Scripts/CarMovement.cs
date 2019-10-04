@@ -23,6 +23,7 @@ public class CarMovement : MonoBehaviour {
     public int[] PowerContact;
 
     private Vector3[] GroundNormal;
+    private Vector3[] TireForces;
 
     public float EnginePitchMin = 1f;
     public float EnginePitchMax = 2f;
@@ -35,6 +36,7 @@ public class CarMovement : MonoBehaviour {
     private float SteerInput;
     private float SteerRotation;
     private float EngineRPM;
+    private bool HandBrake;
     private float[] WheelSpin;
 
     void Start() {
@@ -44,6 +46,7 @@ public class CarMovement : MonoBehaviour {
 
         GroundNormal = new Vector3[TireContact.Length];
         WheelSpin = new float[Wheels.Length];
+        TireForces = new Vector3[TireContact.Length];
     }
 
     private void FixedUpdate() {
@@ -82,14 +85,26 @@ public class CarMovement : MonoBehaviour {
             WheelSpin[i] += relVel.z / Time.fixedDeltaTime / .304f; // TODO: make .304 (the wheel radius) not hard-coded
 
             relVel.y = relVel.z = 0;
-            relVel.x = -relVel.x;
 
-            Vector3 tireForce = TireContact[i].TransformVector(relVel) * TireGrip;
+            float a = .7f;
+            float b = 2f;
+            float k = .309f;
 
-            rbody.AddForceAtPosition(tireForce, TireContact[i].position);
+            float x = a * (Mathf.Abs(relVel.x) - k);
+            float force = (a * (x - k) * Mathf.Exp(1 - a * (x - k)) + b) / (b + 1);
+
+            TireForces[i] = TireContact[i].right * -Mathf.Sign(relVel.x) * force * TireGrip;
+
+            rbody.AddForceAtPosition(TireForces[i], TireContact[i].position);
             Wheels[i].localRotation = Quaternion.Euler(0, 0, WheelSpin[i] * Mathf.Deg2Rad);
 
-            Debug.DrawLine(TireContact[i].position, TireContact[i].position + tireForce / rbody.mass);
+            //TODO: This is a cheating handbrake. It increases TireForces and doesn't slow the car down
+            if (HandBrake)
+            {
+                rbody.AddForceAtPosition(TireForces[i] * 3.0f, TireContact[i].position);
+                // Simulates rear wheels locking up when handbrake is engaged 
+                Wheels[2].localRotation = Quaternion.Euler(0, 0, 0);
+            }
         }
 
         // Drag
@@ -100,10 +115,14 @@ public class CarMovement : MonoBehaviour {
         // Handle input
         SteerInput = Input.GetAxis("Horizontal");
         ThrottleInput = Input.GetAxis("Vertical");
+        HandBrake = Input.GetKey("space");
     }
 
     private void LateUpdate() {
         audioSrc.pitch = Mathf.Lerp(EnginePitchMin, EnginePitchMax, EngineRPM / RedlineRPM);
+
+        Debug.Log(Mathf.Round(rbody.velocity.magnitude) + " MPH");
+
     }
 
     private void OnCollisionEnter(Collision collision) {
