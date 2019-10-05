@@ -19,9 +19,12 @@ public class CarMovement : MonoBehaviour {
     public Transform[] Wheels;
     public Transform[] Steering;
     public Transform[] TireContact;
-
     public int[] PowerContact;
 
+    public ParticleSystem leftParticle;
+    public ParticleSystem rightParticle;
+
+    private float carSpeed;
     private Vector3[] GroundNormal;
     private Vector3[] TireForces;
 
@@ -43,13 +46,14 @@ public class CarMovement : MonoBehaviour {
         rbody = GetComponent<Rigidbody>();
         rbody.centerOfMass = CoM.localPosition;
         audioSrc = GetComponent<AudioSource>();
-
+     
         GroundNormal = new Vector3[TireContact.Length];
         WheelSpin = new float[Wheels.Length];
         TireForces = new Vector3[TireContact.Length];
     }
 
     private void FixedUpdate() {
+
         // Increment Engine RPM
         if (ThrottleInput != 0f)
             EngineRPM += Mathf.Abs(ThrottleInput) * RedlineRPM * Time.fixedDeltaTime;
@@ -95,20 +99,34 @@ public class CarMovement : MonoBehaviour {
 
             TireForces[i] = TireContact[i].right * -Mathf.Sign(relVel.x) * force * TireGrip;
 
-            rbody.AddForceAtPosition(TireForces[i], TireContact[i].position);
+            rbody.AddForceAtPosition(TireForces[i], TireContact[i].position); 
             Wheels[i].localRotation = Quaternion.Euler(0, 0, WheelSpin[i] * Mathf.Deg2Rad);
 
-            //TODO: This is a cheating handbrake. It increases TireForces and doesn't slow the car down
             if (HandBrake)
             {
-                rbody.AddForceAtPosition(TireForces[i] * 3.0f, TireContact[i].position);
-                // Simulates rear wheels locking up when handbrake is engaged 
-                Wheels[2].localRotation = Quaternion.Euler(0, 0, 0);
+                // Stopping the wheelspin from increasing
+                WheelSpin[i] += 0f;
+
+                // Adding force with handbrake on
+                rbody.AddForceAtPosition(TireForces[i], TireContact[i].position);
+
+                // Turning tire smoke on
+                leftParticle.Play(); 
+                rightParticle.Play();
+            } else
+            {
+                //Turning tire smoke off
+                leftParticle.Stop();
+                rightParticle.Stop();
             }
         }
 
         // Drag
         rbody.AddForce(-rbody.velocity * Vector3.Dot(rbody.velocity, rbody.velocity) * Drag);
+
+        carSpeed = rbody.velocity.magnitude;
+
+        Debug.Log(Mathf.Round(carSpeed / 1.609f) + " MPH"); //Pretty sure were working with metric system here
     }
 
     void Update() {
@@ -119,10 +137,30 @@ public class CarMovement : MonoBehaviour {
     }
 
     private void LateUpdate() {
-        audioSrc.pitch = Mathf.Lerp(EnginePitchMin, EnginePitchMax, EngineRPM / RedlineRPM);
 
-        Debug.Log(Mathf.Round(rbody.velocity.magnitude) + " MPH");
+        // Factored out EngineRPM Engine Pitch Min and Max to fake a better sounding noise
+        audioSrc.pitch = 0.30f + carSpeed * 0.025f;
 
+        if (carSpeed > 30)
+        {
+            audioSrc.pitch = 0.25f + carSpeed * 0.024f;
+        }
+
+        if (carSpeed > 40)
+        {
+            audioSrc.pitch = 0.20f + carSpeed * 0.023f;
+        }
+
+        if (carSpeed > 49)
+        {
+            audioSrc.pitch = 0.15f + carSpeed * 0.022f;
+        }
+
+        // setting a max value for the pitch
+        if (audioSrc.pitch > 2.5)
+        {
+            audioSrc.pitch = 2.5f;
+        }
     }
 
     private void OnCollisionEnter(Collision collision) {

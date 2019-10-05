@@ -765,7 +765,7 @@ ParticleSystem:
       serializedVersion: 2
       minMaxState: 0
       minColor: {r: 1, g: 1, b: 1, a: 1}
-      maxColor: {r: 0.6981132, g: 0.6981132, b: 0.6981132, a: 0.95686275}
+      maxColor: {r: 0.6226415, g: 0.6226415, b: 0.6226415, a: 0.5647059}
       maxGradient:
         serializedVersion: 2
         key0: {r: 1, g: 1, b: 1, a: 1}
@@ -5797,7 +5797,7 @@ ParticleSystem:
       serializedVersion: 2
       minMaxState: 0
       minColor: {r: 1, g: 1, b: 1, a: 1}
-      maxColor: {r: 0.6981132, g: 0.6981132, b: 0.6981132, a: 0.95686275}
+      maxColor: {r: 0.41509432, g: 0.40922034, b: 0.40922034, a: 0.91764706}
       maxGradient:
         serializedVersion: 2
         key0: {r: 1, g: 1, b: 1, a: 1}
