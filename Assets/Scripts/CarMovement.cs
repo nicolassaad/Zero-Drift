@@ -1,12 +1,6 @@
 ﻿using UnityEngine;
 using System.Text;
 
-// TODO Add a handbrake: Applying handbrake should lessen carGrip and increase turnspeed as long as the handbrake is being held.
-//      Or maybe you can even momentarily change the ForceMode to VelocityChange while the brake is being held. 
-// TODO Disable throttle and turning when car is in the air (wheels still can turn, and throttle can still rev)
-//      Ground box collision can be a trigger and make a boolean that can be checked in FixedUpdate(). If carOnGround = true
-//      then run all the code in FixedUpdate(). Otherwise return so nothing happens.
-
 #if UNITY_EDITOR
 using UnityEditor;
 [CustomEditor(typeof(CarMovement))]
